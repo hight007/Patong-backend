@@ -8,7 +8,7 @@ const bcrypt = require("bcryptjs");
 const user = require("./../database/models/user");
 
 //api
-router.post("/users", async (req, res) => {
+router.post("/user", async (req, res) => {
     try {
         // console.log(req.body);
         req.body.password = bcrypt.hashSync(req.body.password, 9);
@@ -23,7 +23,7 @@ router.post("/users", async (req, res) => {
     }
 })
 
-router.get("/users", async (req, res) => {
+router.get("/user", async (req, res) => {
     try {
         const result = await user.findAll({
             attributes: ["user_id", "username", "user_level", "createdBy", "lastLogOn", "createdAt", "updatedAt"],
@@ -37,7 +37,7 @@ router.get("/users", async (req, res) => {
     }
 })
 
-router.patch("/users", async (req, res) => {
+router.patch("/user", async (req, res) => {
     try {
         const { user_id } = req.body
         const result = await user.update(req.body, { where: { user_id } });
@@ -49,7 +49,7 @@ router.patch("/users", async (req, res) => {
     }
 })
 
-router.delete("/users", async (req, res) => {
+router.delete("/user", async (req, res) => {
     try {
         const { user_id } = req.body
         const result = await user.destroy({
