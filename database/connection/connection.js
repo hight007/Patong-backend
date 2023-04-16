@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
 require('dotenv').config({ path: 'secret.env' });
-
+ 
 const host = process.env.SQL_HOST
 const database = process.env.SQL_DATABASE
 const username = process.env.SQL_USERNAME

@@ -7,14 +7,26 @@ const { Op } = require("sequelize");
 const product = require("./../database/models/product");
 const stock = require("./../database/models/stock");
 const stockTracking = require("./../database/models/stockTracking");
+const area = require("./../database/models/area");
+
+stock.belongsTo(area, {
+    foreignKey: "area_id",
+    targetKey: "area_id",
+});
+area.hasMany(stock, {
+    foreignKey: "area_id",
+    targetKey: "area_id",
+});
 
 //api
-router.get("/stocks/findByStockName/?stockName=:stockName", async (req, res) => {
+router.get("/findByStockName/stockName=:stockName", async (req, res) => {
     try {
         const { stockName } = req.params
+
         const result = await stock.findOne({
             where: { stockName }
         });
+
 
         res.json({ result, api_result: OK })
     } catch (error) {
@@ -22,9 +34,25 @@ router.get("/stocks/findByStockName/?stockName=:stockName", async (req, res) => 
         res.json({ error, api_result: NOK })
     }
 })
-router.get("/stocksTracking/findByStockId/?stockId=?stockId", async (req, res) => {
+router.get("/findByProductId/productId=:productId", async (req, res) => {
     try {
-        const { stockId } = req.params
+        const { productId } = req.params
+        const result = await stock.findAll({
+            where: { productId, status: { [Op.in]: ['recieved', 'moved'], } },
+            include: [area],
+            orderBy: [['UpdatedAt' , 'asc']]
+        });
+        const totalQty = await stock.sum('quantity', { where: { productId, status: { [Op.in]: ['recieved', 'moved'] } } })
+
+        res.json({ result, api_result: OK, totalQty })
+    } catch (error) {
+        console.log(error);
+        res.json({ error, api_result: NOK })
+    }
+})
+router.get("/StocksTracking/findByStockId", async (req, res) => {
+    try {
+        const { stockId } = req.body
         const result = await stockTracking.findAll({
             where: { stockId }
         });
@@ -36,8 +64,7 @@ router.get("/stocksTracking/findByStockId/?stockId=?stockId", async (req, res) =
     }
 })
 
-
-router.post("/stocks", async (req, res) => {
+router.post("/Stock", async (req, res) => {
     try {
         const result = await stock.create(req.body);
 
@@ -47,7 +74,7 @@ router.post("/stocks", async (req, res) => {
         res.json({ error, api_result: NOK })
     }
 })
-router.post("/stocksTracking", async (req, res) => {
+router.post("/StocksTracking", async (req, res) => {
     try {
         const result = await stockTracking.create(req.body);
 
@@ -58,7 +85,7 @@ router.post("/stocksTracking", async (req, res) => {
     }
 })
 
-router.patch("/stocks", async (req, res) => {
+router.patch("/Stock", async (req, res) => {
     try {
         const { stockId } = req.body
         const result = await stock.update(req.body, { where: { stockId } });

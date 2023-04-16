@@ -47,6 +47,11 @@ const user = database.define(
             allowNull: false,
             defaultValue: true
         },
+        isOrdered: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
+        },
         default_total_quantity: {
             type: Sequelize.DOUBLE,
             allowNull: false,

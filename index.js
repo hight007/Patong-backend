@@ -14,9 +14,11 @@ app.use("/api/patong/authen/", require("./api/api_authen"));
 app.use("/api/patong/users/", verifyToken ,require("./api/api_user"));
 app.use("/api/patong/areas/", verifyToken, require("./api/api_area"));
 app.use("/api/patong/products/", verifyToken, require("./api/api_product"));
+app.use("/api/patong/stocks/", verifyToken, require("./api/api_stock"));
+app.use("/api/patong/report/" , verifyToken, require("./api/api_report"));
 
 app.listen(port, () => {
     console.log(`Backend Patong is running on port ${port}`);
 });
-
+ 
 // exports.patong = app 
