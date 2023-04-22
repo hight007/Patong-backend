@@ -79,9 +79,10 @@ left join (
 	select "productId" 
 	,sum(total_quantity) as total_quantity
 	from public."tbStocks"
+    where "status" in ('recieved' , 'moved')
 	group by "productId"
 ) s on s."productId" = p."productId"
-where p."isActive" = true ${where}`, {
+where  p."isActive" = true ${where}`, {
             raw: true,
         }
         );

@@ -39,7 +39,7 @@ const user = database.define(
             type: Sequelize.INTEGER,
             allowNull: false,
         },
-        //recieved , moved , issued , sold
+        //recieved , moved , issued , sold , cutoff
         status: {
             type: Sequelize.STRING,
             allowNull: false,

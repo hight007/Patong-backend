@@ -18,6 +18,33 @@ area.hasMany(stock, {
     targetKey: "area_id",
 });
 
+stock.belongsTo(product, {
+    foreignKey: "productId",
+    targetKey: "productId",
+});
+product.hasMany(stock, {
+    foreignKey: "productId",
+    targetKey: "productId",
+});
+
+stockTracking.belongsTo(area, {
+    foreignKey: "area_id",
+    targetKey: "area_id",
+});
+area.hasMany(stockTracking, {
+    foreignKey: "area_id",
+    targetKey: "area_id",
+});
+
+stockTracking.belongsTo(stock, {
+    foreignKey: "stockId",
+    targetKey: "stockId",
+});
+stock.hasMany(stockTracking, {
+    foreignKey: "stockId",
+    targetKey: "stockId",
+});
+
 //api
 router.get("/findByStockName/stockName=:stockName", async (req, res) => {
     try {
@@ -39,8 +66,8 @@ router.get("/findByProductId/productId=:productId", async (req, res) => {
         const { productId } = req.params
         const result = await stock.findAll({
             where: { productId, status: { [Op.in]: ['recieved', 'moved'], } },
-            include: [area],
-            orderBy: [['UpdatedAt' , 'asc']]
+            include: [area , stock],
+            order: [['updatedAt' , 'ASC']]
         });
         const totalQty = await stock.sum('quantity', { where: { productId, status: { [Op.in]: ['recieved', 'moved'] } } })
 
@@ -50,10 +77,11 @@ router.get("/findByProductId/productId=:productId", async (req, res) => {
         res.json({ error, api_result: NOK })
     }
 })
-router.get("/StocksTracking/findByStockId", async (req, res) => {
+router.get("/StocksTracking/stockId=:stockId", async (req, res) => {
     try {
-        const { stockId } = req.body
+        const { stockId } = req.params
         const result = await stockTracking.findAll({
+            include: [{ model: area, attributes : ['area']}, { model: stock, attributes: ['stockName']}],
             where: { stockId }
         });
 
@@ -62,6 +90,37 @@ router.get("/StocksTracking/findByStockId", async (req, res) => {
         console.log(error);
         res.json({ error, api_result: NOK })
     }
+})
+router.get("/findAllByProductId/productId=:productId", async (req, res) => {
+    try {
+        const { productId } = req.params
+        const result = await stock.findAll({
+            where: { productId},
+            include: [area],
+            order: [['updatedAt', 'DESC']]
+        });
+        res.json({ result, api_result: OK })
+    } catch (error) {
+        console.log(error);
+        res.json({ error, api_result: NOK })
+    }
+})
+router.get("/reprint/stockId=:stockId" , async (req, res) => {
+    try {
+        const { stockId } = req.params
+        const listStockId = JSON.parse(stockId)
+
+        const result = await stock.findAll({
+            include: [{ model: product, attributes: ['spec', 'productName'], }],
+            where: { stockId: { [Op.in]: listStockId }, },
+        });
+
+        res.json({ result, api_result: OK })
+    } catch (error) {
+        console.log(error);
+        res.json({ error, api_result: NOK })
+    }
+    
 })
 
 router.post("/Stock", async (req, res) => {
