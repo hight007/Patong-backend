@@ -66,7 +66,7 @@ router.get("/findByProductId/productId=:productId", async (req, res) => {
         const { productId } = req.params
         const result = await stock.findAll({
             where: { productId, status: { [Op.in]: ['recieved', 'moved'], } },
-            include: [area , stock],
+            include: [area ],
             order: [['updatedAt' , 'ASC']]
         });
         const totalQty = await stock.sum('quantity', { where: { productId, status: { [Op.in]: ['recieved', 'moved'] } } })
