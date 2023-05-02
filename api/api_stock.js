@@ -111,7 +111,7 @@ router.get("/reprint/stockId=:stockId" , async (req, res) => {
         const listStockId = JSON.parse(stockId)
 
         const result = await stock.findAll({
-            include: [{ model: product, attributes: ['spec', 'productName'], }],
+            include: [{ model: product, attributes: ['spec', 'productName', 'default_price'], }],
             where: { stockId: { [Op.in]: listStockId }, },
         });
 
