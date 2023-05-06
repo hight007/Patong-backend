@@ -82,7 +82,8 @@ router.get("/StocksTracking/stockId=:stockId", async (req, res) => {
         const { stockId } = req.params
         const result = await stockTracking.findAll({
             include: [{ model: area, attributes : ['area']}, { model: stock, attributes: ['stockName']}],
-            where: { stockId }
+            where: { stockId },
+            order : [['updatedAt' , 'desc']]
         });
 
         res.json({ result, api_result: OK })

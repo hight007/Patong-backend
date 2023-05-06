@@ -2,6 +2,7 @@ const { OK, NOK } = require("./../constants");
 const express = require("express");
 const router = express.Router();
 const { Op } = require("sequelize");
+const moment = require("moment")
 
 //Models
 const product = require("./../database/models/product");
@@ -40,7 +41,7 @@ router.get("/stockByProduct/productType=:productType", async (req, res) => {
         const result = await stock.findAll({
             attributes: [
                 "tbProduct.productName",
-                [sequelize.fn('sum', sequelize.col('total_quantity')), 'remain_quantity'],
+                [sequelize.fn('sum', sequelize.col('quantity')), 'remain_quantity'],
             ],
             include: [{ model: product, where }],
             group: ['tbProduct.productName', "tbProduct.productId"],
@@ -77,7 +78,7 @@ p."productId"
 FROM public."tbProducts" p 
 left join (
 	select "productId" 
-	,sum(total_quantity) as total_quantity
+	,sum(quantity) as total_quantity
 	from public."tbStocks"
     where "status" in ('recieved' , 'moved')
 	group by "productId"
@@ -85,6 +86,31 @@ left join (
 where  p."isActive" = true ${where}`, {
             raw: true,
         }
+        );
+
+        res.json({ result: result[0], api_result: OK })
+    } catch (error) {
+        console.log(error);
+        res.json({ error, api_result: NOK })
+    }
+})
+router.get("/summaryStockTracking/dateFrom=:dateFrom&dateTo=:dateTo", async (req, res) => {
+    try {
+        const { dateFrom, dateTo  } = req.params
+
+        const result = await product.sequelize.query(`SELECT p."productName" 
+, s."productId"
+, t."status" 
+, sum(t."quantity") as quantity
+
+FROM public."tbStockTrackings" t
+INNER JOIN public."tbStocks" s ON s."stockId" = t."stockId"
+INNER JOIN public."tbProducts" p ON p."productId" = s."productId"
+where  DATE(t."createdAt") between '${moment(dateFrom).format('YYYYMMDD')}' and '${moment(dateTo).format('YYYYMMDD')}'
+group by p."productName"  ,t."status" , s."productId" ;`,
+            {
+                raw: true,
+            }
         );
 
         res.json({ result: result[0], api_result: OK })
